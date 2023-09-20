@@ -326,6 +326,12 @@ chart_retail_price_vs_real_sales_changes <-
   )) +
   geom_hline(yintercept = 0, linewidth = 0.25) +
   geom_vline(xintercept = 0, linewidth = 0.25) +
+  geom_vline(
+    xintercept = 0.07793345,
+    linewidth = 0.5,
+    linetype = "dashed",
+    colour = grey(0.5)
+  ) +
   geom_point(
     mapping = aes(size = volume),
     shape = 21,
@@ -335,6 +341,15 @@ chart_retail_price_vs_real_sales_changes <-
   geom_text(
     mapping = aes(label = label, hjust = hjust),
     colour = "purple4"
+  ) +
+  annotate(
+    geom = "text",
+    x = 0.081,
+    y = -0.27,
+    label = "CPI: 7.8%",
+    colour = grey(0.5),
+    hjust = 0,
+    fontface = "bold"
   ) +
   scale_size_area(
     max_size = 15,
