@@ -281,7 +281,96 @@ dat_retail_price_indexes_change <- dat_retail_price_indexes |>
   group_by(sector) |>
   mutate(pct_chg = data_value / lag(data_value) - 1) |>
   ungroup() |>
-  filter(year(date) == 2023)
+  filter(year(date) == 2023) |>
+  mutate(direction = ifelse(
+    test = pct_chg > 0,
+    yes = "up",
+    no = "down"
+  )) |>
+  mutate(hjust = ifelse(
+    test = pct_chg > 0,
+    yes = 0,
+    no = 1
+  )) |>
+  mutate(label_x = ifelse(
+    test = pct_chg > 0,
+    yes = pct_chg + 0.002,
+    no = pct_chg - 0.002
+  ))
+
+chart_retail_price_indexes_change <- dat_retail_price_indexes_change |>
+  ggplot(mapping = aes(
+    y = fct_reorder(.f = sector, .x = pct_chg),
+    x = pct_chg,
+    fill = direction,
+    colour = direction,
+    label = percent(x = pct_chg, accuracy = 0.1)
+  )) +
+  geom_vline(xintercept = 0, linewidth = 0.25) +
+  geom_vline(
+    xintercept = 0.07793345,
+    linewidth = 0.5,
+    linetype = "dashed",
+    colour = grey(0.5)
+  ) +
+  geom_col(
+    linewidth = 0
+  ) +
+  geom_text(mapping = aes(
+    x = label_x,
+    hjust = hjust
+  ),
+  size = 3,
+  fontface = "bold"
+  ) +
+  annotate(
+    geom = "text",
+    x = 0.081,
+    y = 1,
+    label = "CPI: 7.8%",
+    colour = grey(0.5),
+    hjust = 0,
+    fontface = "bold"
+  ) +
+  scale_x_continuous(
+    limits = c(-0.069, 0.16),
+    breaks = seq(-0.1, 0.2, 0.05),
+    labels = percent_format(accuracy = 1),
+    expand = expansion(0, 0),
+    position = "top"
+  ) +
+  scale_colour_manual(
+    values = c(
+      "up" = "cornflowerblue",
+      "down" = "firebrick"
+    ),
+    guide = "none",
+    aesthetics = c("colour", "fill")
+  ) +
+  labs(
+    x = "Retail price index mid-2023 vs early 2022",
+    y = ""
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.title.x.top = element_text(
+      face = "italic",
+      margin = margin(0, 0, 8, 0, "pt")
+    )
+  )
+
+ggsave(
+  filename = here("outputs/chart_retail_price_indexes_change.png"),
+  plot = chart_retail_price_indexes_change,
+  device = agg_png,
+  width = 26,
+  height = 10,
+  units = "cm",
+  bg = "white"
+)
 
 # Scatterplot price index changes vs real sales changes Jan 2023 vs 2022
 dat_retail_price_vs_real_sales_changes <-
